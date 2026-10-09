@@ -479,12 +479,20 @@
             </div>
           </div>
 
+          <!-- UX Coachmark -->
+          <div class="p-4 bg-blue-50/70 border border-blue-200/80 rounded-xl flex items-start gap-3">
+            <span class="text-blue-600 text-lg">👉</span>
+            <div class="text-xs text-blue-900 leading-relaxed">
+              <strong>Jak z tego korzystać:</strong> Przesuwaj suwak <strong>Siła Kary λ</strong>. Zobacz, jak pionowa fioletowa linia wskaźnika wędruje wzdłuż osi kary, a 4 kolorowe punkty suną w dół po krzywych. Obserwuj zjawisko selekcji cech: przy <strong>λ ≥ 2.0 współczynnik Lasso β₂ uderza dokładnie w 0</strong> (cecha zostaje wyeliminowana z modelu), podczas gdy współczynniki w <strong>Ridge asymptotycznie dążą do zera</strong>, lecz nigdy go nie osiągają!
+            </div>
+          </div>
+
           <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-200 pb-3">
               <span class="text-xs font-bold text-slate-700 uppercase">
                 Siła Kary λ: <span id="regVal" class="text-blue-600 font-mono font-bold">1.0</span>
               </span>
-              <input id="regSlider" type="range" min="0" max="4.0" step="0.2" value="1.0" class="w-36">
+              <input id="regSlider" type="range" min="0" max="4.0" step="0.1" value="1.0" class="w-40 accent-blue-600">
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
@@ -492,13 +500,56 @@
                 <div id="regPlot" class="w-full h-80 rounded-xl overflow-hidden bg-white border border-slate-200 shadow-sm"></div>
               </div>
               <div class="lg:col-span-4 space-y-3 text-xs font-mono">
-                <div class="p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-1">
-                  <span class="font-sans font-bold text-blue-600 block">Współczynniki Ridge (L₂):</span>
-                  <div class="flex justify-between"><span>β₁: <strong id="regR1">--</strong></span><span>β₂: <strong id="regR2">--</strong></span></div>
+                <!-- Status selekcji Lasso -->
+                <div id="regLassoStatus" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-sans font-semibold flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>Model Lasso: obie cechy aktywne</span>
                 </div>
-                <div class="p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-1">
+
+                <!-- Ridge z paskami skurczenia -->
+                <div class="p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-2.5">
+                  <span class="font-sans font-bold text-blue-600 block">Współczynniki Ridge (L₂):</span>
+                  <div>
+                    <div class="flex justify-between text-[11px] mb-1">
+                      <span>β₁: <strong id="regR1">--</strong></span>
+                      <span id="regR1Pct" class="text-slate-400 font-sans">100%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div id="regR1Bar" class="bg-blue-600 h-1.5 rounded-full transition-all duration-75" style="width: 100%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-[11px] mb-1">
+                      <span>β₂: <strong id="regR2">--</strong></span>
+                      <span id="regR2Pct" class="text-slate-400 font-sans">100%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div id="regR2Bar" class="bg-blue-400 h-1.5 rounded-full transition-all duration-75" style="width: 100%"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Lasso z paskami skurczenia -->
+                <div class="p-3.5 bg-white rounded-xl border border-slate-200 shadow-sm space-y-2.5">
                   <span class="font-sans font-bold text-emerald-600 block">Współczynniki Lasso (L₁):</span>
-                  <div class="flex justify-between"><span>β₁: <strong id="regL1">--</strong></span><span>β₂: <strong id="regL2" class="text-rose-600">--</strong></span></div>
+                  <div>
+                    <div class="flex justify-between text-[11px] mb-1">
+                      <span>β₁: <strong id="regL1">--</strong></span>
+                      <span id="regL1Pct" class="text-slate-400 font-sans">100%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div id="regL1Bar" class="bg-emerald-600 h-1.5 rounded-full transition-all duration-75" style="width: 100%"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-[11px] mb-1">
+                      <span>β₂: <strong id="regL2" class="text-rose-600">--</strong></span>
+                      <span id="regL2Pct" class="text-rose-500 font-sans font-bold">100%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                      <div id="regL2Bar" class="bg-rose-500 h-1.5 rounded-full transition-all duration-75" style="width: 100%"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

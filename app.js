@@ -911,9 +911,33 @@ function initModule7Regularization() {
   const valR2 = document.getElementById('regR2');
   const valL1 = document.getElementById('regL1');
   const valL2 = document.getElementById('regL2');
+  const barR1 = document.getElementById('regR1Bar');
+  const barR2 = document.getElementById('regR2Bar');
+  const barL1 = document.getElementById('regL1Bar');
+  const barL2 = document.getElementById('regL2Bar');
+  const pctR1 = document.getElementById('regR1Pct');
+  const pctR2 = document.getElementById('regR2Pct');
+  const pctL1 = document.getElementById('regL1Pct');
+  const pctL2 = document.getElementById('regL2Pct');
+  const lassoStatus = document.getElementById('regLassoStatus');
 
   const trueBeta1 = 3.5;
   const trueBeta2 = 2.8;
+
+  // Ścieżki regularyzacji (krzywe bazowe)
+  const lVals = [], r1 = [], r2 = [], ls1 = [], ls2 = [];
+  for (let i = 0; i <= 4; i += 0.05) {
+    lVals.push(i);
+    r1.push(trueBeta1 / (1 + 0.8 * i));
+    r2.push(trueBeta2 / (1 + 0.8 * i));
+    ls1.push(Math.max(0, trueBeta1 - 1.2 * i));
+    ls2.push(Math.max(0, trueBeta2 - 1.4 * i));
+  }
+
+  const tR1 = { x: lVals, y: r1, name: 'Ridge: β₁', line: { color: '#2563eb', width: 2.5 }, hoverinfo: 'none' };
+  const tR2 = { x: lVals, y: r2, name: 'Ridge: β₂', line: { color: '#60a5fa', width: 2, dash: 'dash' }, hoverinfo: 'none' };
+  const tL1 = { x: lVals, y: ls1, name: 'Lasso: β₁', line: { color: '#059669', width: 2.5 }, hoverinfo: 'none' };
+  const tL2 = { x: lVals, y: ls2, name: 'Lasso: β₂ (zerowanie!)', line: { color: '#e11d48', width: 2.5, dash: 'dot' }, hoverinfo: 'none' };
 
   function render() {
     const l = parseFloat(slider.value);
@@ -929,31 +953,114 @@ function initModule7Regularization() {
     valL1.textContent = lasso1.toFixed(2);
     valL2.textContent = lasso2.toFixed(2);
 
-    const lVals = [], r1 = [], r2 = [], ls1 = [], ls2 = [];
-    for (let i = 0; i <= 4; i += 0.1) {
-      lVals.push(i);
-      r1.push(trueBeta1 / (1 + 0.8 * i));
-      r2.push(trueBeta2 / (1 + 0.8 * i));
-      ls1.push(Math.max(0, trueBeta1 - 1.2 * i));
-      ls2.push(Math.max(0, trueBeta2 - 1.4 * i));
+    // Animowane paski postępu
+    if (barR1) barR1.style.width = `${Math.min(100, Math.max(0, (ridge1 / trueBeta1) * 100))}%`;
+    if (barR2) barR2.style.width = `${Math.min(100, Math.max(0, (ridge2 / trueBeta2) * 100))}%`;
+    if (barL1) barL1.style.width = `${Math.min(100, Math.max(0, (lasso1 / trueBeta1) * 100))}%`;
+    if (barL2) barL2.style.width = `${Math.min(100, Math.max(0, (lasso2 / trueBeta2) * 100))}%`;
+
+    if (pctR1) pctR1.textContent = `${Math.round((ridge1 / trueBeta1) * 100)}%`;
+    if (pctR2) pctR2.textContent = `${Math.round((ridge2 / trueBeta2) * 100)}%`;
+    if (pctL1) pctL1.textContent = `${Math.round((lasso1 / trueBeta1) * 100)}%`;
+    if (pctL2) pctL2.textContent = `${Math.round((lasso2 / trueBeta2) * 100)}%`;
+
+    // Status Lasso
+    if (lassoStatus) {
+      if (lasso2 === 0) {
+        lassoStatus.className = 'p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 text-[11px] font-sans font-semibold flex items-center gap-2 transition-all';
+        lassoStatus.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse"></span><span>⚡ Selekcja Cech: β₂ = 0 (zmienna usunięta!)</span>';
+      } else {
+        lassoStatus.className = 'p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] font-sans font-semibold flex items-center gap-2 transition-all';
+        lassoStatus.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Model Lasso: obie cechy aktywne (β₁ > 0, β₂ > 0)</span>';
+      }
     }
 
-    const tR1 = { x: lVals, y: r1, name: 'Ridge: β₁', line: { color: '#2563eb', width: 2 } };
-    const tR2 = { x: lVals, y: r2, name: 'Ridge: β₂', line: { color: '#60a5fa', width: 2, dash: 'dash' } };
-    const tL1 = { x: lVals, y: ls1, name: 'Lasso: β₁', line: { color: '#059669', width: 2 } };
-    const tL2 = { x: lVals, y: ls2, name: 'Lasso: β₂ (zerowanie!)', line: { color: '#e11d48', width: 2, dash: 'dot' } };
+    // Dynamiczna pionowa linia wskaźnika aktualnej kary λ
+    const tCursor = {
+      x: [l, l],
+      y: [0, 4],
+      mode: 'lines',
+      line: { color: '#6366f1', width: 2, dash: 'dash' },
+      name: `Kursor λ = ${l.toFixed(1)}`,
+      hoverinfo: 'none'
+    };
+
+    // Dynamiczne punkty na krzywych przesuwające się wraz z suwakiem
+    const tDots = {
+      x: [l, l, l, l],
+      y: [ridge1, ridge2, lasso1, lasso2],
+      mode: 'markers',
+      marker: {
+        color: ['#2563eb', '#60a5fa', '#059669', lasso2 === 0 ? '#b91c1c' : '#e11d48'],
+        size: [12, 11, 12, lasso2 === 0 ? 15 : 11],
+        symbol: ['circle', 'circle', 'circle', lasso2 === 0 ? 'x' : 'circle'],
+        line: { color: '#ffffff', width: 2 }
+      },
+      name: 'Punkty dla aktualnego λ',
+      hovertemplate: '<b>%{text}</b><br>Kara λ: %{x:.1f}<br>Wartość β: %{y:.2f}<extra></extra>',
+      text: [
+        `Ridge β₁ = ${ridge1.toFixed(2)}`,
+        `Ridge β₂ = ${ridge2.toFixed(2)}`,
+        `Lasso β₁ = ${lasso1.toFixed(2)}`,
+        lasso2 === 0 ? 'Lasso β₂ = 0.00 (WYEROWANA!)' : `Lasso β₂ = ${lasso2.toFixed(2)}`
+      ]
+    };
+
+    const annotations = [
+      {
+        x: l,
+        y: 3.9,
+        xref: 'x',
+        yref: 'y',
+        text: `λ = ${l.toFixed(1)}`,
+        showarrow: true,
+        arrowhead: 2,
+        arrowsize: 1,
+        arrowcolor: '#6366f1',
+        ax: 0,
+        ay: -24,
+        font: { color: '#4338ca', size: 11, weight: 'bold', family: 'Plus Jakarta Sans' },
+        bgcolor: '#e0e7ff',
+        bordercolor: '#c7d2fe',
+        borderwidth: 1,
+        borderpad: 4
+      }
+    ];
+
+    if (lasso2 === 0) {
+      annotations.push({
+        x: l,
+        y: 0,
+        xref: 'x',
+        yref: 'y',
+        text: 'Lasso β₂ = 0 (Selekcja!)',
+        showarrow: true,
+        arrowhead: 2,
+        arrowsize: 1,
+        arrowcolor: '#dc2626',
+        ax: 40,
+        ay: -28,
+        font: { color: '#991b1b', size: 10, weight: 'bold', family: 'Plus Jakarta Sans' },
+        bgcolor: '#fee2e2',
+        bordercolor: '#fca5a5',
+        borderwidth: 1,
+        borderpad: 3
+      });
+    }
 
     const layout = {
       paper_bgcolor: 'transparent',
       plot_bgcolor: '#f8fafc',
       font: { color: '#64748b', family: 'Plus Jakarta Sans', size: 10 },
-      margin: { l: 35, r: 20, t: 25, b: 35 },
-      xaxis: { title: 'Kara λ', gridcolor: '#e2e8f0' },
-      yaxis: { title: 'Współczynnik β', range: [0, 4], gridcolor: '#e2e8f0' },
+      margin: { l: 35, r: 25, t: 35, b: 35 },
+      xaxis: { title: 'Kara λ (siła regularyzacji)', range: [-0.1, 4.1], gridcolor: '#e2e8f0', zerolinecolor: '#cbd5e1' },
+      yaxis: { title: 'Współczynnik β', range: [-0.1, 4.1], gridcolor: '#e2e8f0', zerolinecolor: '#cbd5e1' },
       showlegend: true,
-      legend: { orientation: 'h', y: -0.25 }
+      legend: { orientation: 'h', y: -0.28 },
+      annotations: annotations
     };
-    Plotly.react('regPlot', [tR1, tR2, tL1, tL2], layout, { responsive: true, displayModeBar: false });
+
+    Plotly.react('regPlot', [tR1, tR2, tL1, tL2, tCursor, tDots], layout, { responsive: true, displayModeBar: false });
   }
 
   slider.addEventListener('input', render);
