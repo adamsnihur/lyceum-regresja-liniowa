@@ -51,38 +51,76 @@
     </div>
   </header>
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      
-      <!-- LEWY SIDEBAR: SPIS TREŚCI (Sticky) -->
-      <aside class="hidden lg:block lg:col-span-3">
-        <div class="sticky top-24 saas-card p-5 space-y-3">
-          <div class="border-b border-slate-100 pb-2.5">
-            <span class="text-[11px] font-bold font-mono tracking-wider text-blue-600 uppercase">Spis Treści</span>
-          </div>
-          <nav class="space-y-1 text-xs">
-            <a href="#modul-1" class="nav-link block px-3 py-2 rounded-xl">1. Kwadraty Gaussa & Intuicja</a>
-            <a href="#modul-2" class="nav-link block px-3 py-2 rounded-xl">2. Wyprowadzenie OLS & Rzut 3D</a>
-            <a href="#modul-3" class="nav-link block px-3 py-2 rounded-xl">3. Gradient Descent & Fizyka</a>
-            <a href="#modul-4" class="nav-link block px-3 py-2 rounded-xl">4. Założenia Gaussa-Markowa</a>
-            <a href="#modul-5" class="nav-link block px-3 py-2 rounded-xl">5. Kwartet Anscombe'a</a>
-            <a href="#modul-6" class="nav-link block px-3 py-2 rounded-xl">6. Pasy Ufności & Predykcji</a>
-            <a href="#modul-7" class="nav-link block px-3 py-2 rounded-xl">7. Regularyzacja: Ridge & Lasso</a>
-            <a href="#modul-8" class="nav-link block px-3 py-2 rounded-xl">8. Dotykowy Sandbox z Myszką</a>
-            <a href="#modul-9" class="nav-link block px-3 py-2 rounded-xl">9. Sprawdzian Zrozumienia (Quiz)</a>
-            <a href="#modul-10" class="nav-link block px-3 py-2 rounded-xl">10. Ściąga Wzorów & Python</a>
-            <a href="#modul-11" class="nav-link block px-3 py-2 rounded-xl">11. Źródła Pierwotne & Bibliografia</a>
-          </nav>
+  <!-- ========================================================================= -->
+  <!-- UKŁAD DWUKOLUMNOWY (LEWY STICKY SIDEBAR + GŁÓWNA TREŚĆ)                  -->
+  <!-- ========================================================================= -->
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex gap-8">
 
-          <div class="pt-3 border-t border-slate-100 text-[11px] text-slate-500 leading-relaxed">
-            <p class="font-medium text-slate-700">Wskazówka dydaktyczna:</p>
-            Każdy moduł posiada interaktywne płótno oraz wskazówki "Jak z tego korzystać".
+    <!-- NAWIGACJA BOCZNA (TOC) -->
+    <aside class="hidden lg:block w-72 shrink-0">
+      <div class="sticky top-20 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+        <div class="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+          Nawigacja Traktatu
+        </div>
+
+        <nav class="space-y-1 text-xs">
+          <a href="#modul-1" class="nav-link active">
+            <span class="font-mono text-slate-400 mr-1.5">01.</span> Kwadraty Gaussa & Intuicja
+          </a>
+          <a href="#modul-2" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">02.</span> Wyprowadzenie OLS & Rzut 3D
+          </a>
+          <a href="#modul-3" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">03.</span> Gradient Descent & Fizyka
+          </a>
+          <a href="#modul-4" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">04.</span> Założenia Gaussa-Markowa
+          </a>
+          <a href="#modul-5" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">05.</span> Kwartet Anscombe'a
+          </a>
+          <a href="#modul-6" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">06.</span> Pasy Ufności & Predykcji
+          </a>
+          <a href="#modul-7" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">07.</span> Regularyzacja: Ridge & Lasso
+          </a>
+          <a href="#modul-8" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">08.</span> Dotykowy Sandbox z Myszką
+          </a>
+          <a href="#modul-9" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">09.</span> Sprawdzian Zrozumienia
+          </a>
+          <a href="#modul-10" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">10.</span> Ściąga Wzorów & Python
+          </a>
+          <a href="#modul-11" class="nav-link">
+            <span class="font-mono text-slate-400 mr-1.5">11.</span> Źródła & Bibliografia
+          </a>
+        </nav>
+
+        <div class="pt-4 border-t border-slate-100">
+          <div class="text-xs text-slate-500 font-mono mb-2">Wskaźniki Regresji</div>
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 space-y-1.5 text-[11px] font-mono">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Kryterium OLS:</span>
+              <span class="text-blue-600 font-bold">Min RSS</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Dowód BLUE:</span>
+              <span class="text-emerald-600 font-bold">Gauss-Markov</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Geometria:</span>
+              <span class="text-slate-700 font-bold">Rzut ortogonalny</span>
+            </div>
           </div>
         </div>
-      </aside>
+      </div>
+    </aside>
 
-      <!-- GŁÓWNA TREŚĆ EDUKACYJNA -->
-      <main class="lg:col-span-9 space-y-14">
+    <!-- GŁÓWNA PRZESTRZEŃ DYDAKTYCZNA -->
+    <main class="flex-1 space-y-8 sm:space-y-12 min-w-0">
 
         <!-- HERO BANNER (SaaS Style) -->
         <section class="saas-card-featured p-8 sm:p-12 relative overflow-hidden">
@@ -873,8 +911,7 @@
           </div>
         </section>
 
-      </main>
-    </div>
+    </main>
   </div>
 
   <!-- Modal Kodu Pythona -->

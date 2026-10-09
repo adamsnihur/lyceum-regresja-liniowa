@@ -1330,20 +1330,26 @@ function initNavScroll() {
   const sections = document.querySelectorAll('section[id]');
   const progress = document.getElementById('scrollProgress');
 
-  window.addEventListener('scroll', () => {
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    if (progress) progress.style.width = (window.scrollY / (docHeight || 1)) * 100 + '%';
+  if (progress) {
+    window.addEventListener('scroll', () => {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      progress.style.width = (window.scrollY / (docHeight || 1)) * 100 + '%';
+    });
+  }
 
-    const pos = window.scrollY + 180;
-    sections.forEach(sec => {
-      const top = sec.offsetTop;
-      const h = sec.offsetHeight;
-      if (pos >= top && pos < top + h) {
-        links.forEach(l => {
-          if (l.getAttribute('href') === '#' + sec.id) l.classList.add('active');
-          else l.classList.remove('active');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        links.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === `#${id}`) {
+            link.classList.add('active');
+          }
         });
       }
     });
-  });
+  }, { threshold: 0.2 });
+
+  sections.forEach(sec => observer.observe(sec));
 }
