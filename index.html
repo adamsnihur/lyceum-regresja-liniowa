@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lyceum: Geometria Myśli - Regresja Liniowa</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Plotly.js CDN -->
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+
+  <!-- KaTeX CDN -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <!-- Custom Styles: Editorial Serif & Precision Lab -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen text-slate-100 selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- Pasek postępu scrollowania -->
+  <div id="scrollProgress" class="fixed top-0 left-0 h-0.5 bg-gradient-to-r from-amber-400 via-sky-400 to-emerald-400 z-50 transition-all duration-75" style="width: 0%;"></div>
+
+  <!-- Główny Nagłówek Nawigacyjny -->
+  <header class="sticky top-0 z-40 bg-[#07090e]/85 backdrop-blur-md border-b border-white/5 px-6 py-4">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-200 flex items-center justify-center font-serif text-slate-950 font-bold text-xl shadow-lg shadow-amber-500/20">
+          Λ
+        </div>
+        <div>
+          <h1 class="text-base font-semibold tracking-wide text-white flex items-center gap-2 font-serif-heading">
+            Lyceum
+            <span class="text-[11px] font-sans font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">Traktat 01: Regresja Liniowa</span>
+          </h1>
+          <p class="text-xs text-slate-400 font-sans">Geometria rzutu ortogonalnego, metoda najmniejszych kwadratów & dowód Gaussa-Markowa</p>
+        </div>
+      </div>
+      <div class="hidden md:flex items-center space-x-6 text-xs text-slate-400">
+        <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> 9 Modułów Dydaktycznych</span>
+        <span class="text-slate-700">|</span>
+        <span>Animowane Płótna Gaussa</span>
+        <span class="text-slate-700">|</span>
+        <span class="text-amber-300/80">Standard Akademicki</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      
+      <!-- LEWY SIDEBAR: SPIS TREŚCI (Sticky Editorial Index) -->
+      <aside class="hidden lg:block lg:col-span-3">
+        <div class="sticky top-24 editorial-panel p-6 space-y-4">
+          <div class="border-b border-white/5 pb-3">
+            <span class="text-[11px] font-mono tracking-widest text-amber-400 uppercase">Spis Treści Traktatu</span>
+          </div>
+          <nav class="space-y-1.5 text-xs text-slate-300">
+            <a href="#modul-1" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">I. Kwadraty Gaussa i Intuicja</a>
+            <a href="#modul-2" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">II. Rzut Ortogonalny w 3D</a>
+            <a href="#modul-3" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">III. Fizyka Gradient Descent</a>
+            <a href="#modul-4" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">IV. Założenia Gaussa-Markowa</a>
+            <a href="#modul-5" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">V. Paradoks Kwartetu Anscombe'a</a>
+            <a href="#modul-6" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">VI. Pasy Ufności i Predykcji</a>
+            <a href="#modul-7" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">VII. Geometria Ridge & Lasso</a>
+            <a href="#modul-8" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">VIII. Dotykowy Sandbox z Myszką</a>
+            <a href="#modul-9" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">IX. Sprawdzian Zrozumienia (Quiz)</a>
+            <a href="#modul-10" class="nav-link block pl-3 py-1.5 rounded-md hover:text-white transition-colors">X. Kompendium Wzorów</a>
+          </nav>
+
+          <div class="pt-4 border-t border-white/5 text-[11px] text-slate-400 leading-relaxed font-sans">
+            <p class="italic text-amber-200/70 mb-1">"Geometria jest archetypem piękna świata."</p>
+            <p>- Johannes Kepler</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- GŁÓWNA TREŚĆ -->
+      <main class="lg:col-span-9 space-y-20">
+
+        <!-- HERO SECTION (Editorial Opening) -->
+        <section class="editorial-panel-gold p-8 sm:p-12 relative overflow-hidden">
+          <div class="relative z-10 max-w-3xl space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/25 text-amber-300 text-xs font-mono">
+              <span>Rozprawa Matematyczna & Laboratorium Interaktywne</span>
+            </div>
+            <h2 class="text-4xl sm:text-5xl font-normal tracking-tight text-white font-serif-heading leading-[1.15]">
+              Od Kwadratów Gaussa do Rzutu Ortogonalnego
+            </h2>
+            <p class="text-slate-300 text-base sm:text-lg leading-relaxed font-sans font-light">
+              Regresja liniowa to nie tylko suchy wzór na nachylenie linii. To fundamentalna prawda geometryczna: poszukiwanie rzutu wektora obserwacji na podprzestrzeń cech pod kątem prostym oraz minimalizacja fizycznej sumy pól kwadratów błędów. 
+              Niniejsze opracowanie wyjaśnia całą teorię wizualnie i bez kompromisów.
+            </p>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 1: KWADRATY GAUSSA (GEOMETRIC LEAST SQUARES)
+             ========================================================================== -->
+        <section id="modul-1" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł I</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Dlaczego Metoda nazywa się "Najmniejszych Kwadratów"?
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Fizyczne kwadraty reszt i geometryczna minimalizacja sumy ich pól</p>
+          </div>
+
+          <div class="text-slate-300 text-sm leading-relaxed space-y-4 font-sans font-light">
+            <p>
+              Gdy Carl Friedrich Gauss w 1795 roku obliczał orbitę planetoidy Ceres, nie myślał o abstrakcyjnych algorytmach. Zauważył, że dla każdej obserwacji $(x_i, y_i)$ błąd prognozy $e_i = y_i - \hat{y}_i$ można zinterpretować jako <strong>bok fizycznego kwadratu</strong> o polu $e_i^2$.
+            </p>
+            <div class="theorem-box">
+              $$S(\beta_0, \beta_1) = \sum_{i=1}^n e_i^2 = \sum_{i=1}^n \left( \text{Pole } i\text{-tego kwadratu} \right)$$
+            </div>
+            <p>
+              Optymalna prosta OLS to dokładnie ta prosta, która minimalizuje <em>łączną powierzchnię wszystkich narysowanych kwadratów naraz</em>.
+            </p>
+          </div>
+
+          <!-- Interaktywne Płótno Kwadratów Gaussa -->
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                Płótno I: Dynamiczne Kwadraty Reszt Gaussa
+              </span>
+              <div class="flex items-center gap-2">
+                <button id="m1ToggleSquares" class="btn-ghost px-3 py-1.5 rounded-lg text-xs font-sans">
+                  Ukryj kwadraty
+                </button>
+                <button id="m1BtnAutoFit" class="btn-gold px-4 py-1.5 rounded-lg text-xs font-sans">
+                  Animuj minimalizację OLS
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-8">
+                <div class="relative w-full h-80 rounded-xl overflow-hidden bg-[#07090e] border border-white/5">
+                  <canvas id="gaussSquaresCanvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+
+              <div class="lg:col-span-4 space-y-5">
+                <div class="space-y-4">
+                  <div>
+                    <div class="flex justify-between text-xs font-mono text-slate-300 mb-1">
+                      <span>Wyraz wolny (b₀):</span>
+                      <span id="m1ValB0" class="text-amber-400 font-bold">0.50</span>
+                    </div>
+                    <input id="m1SliderB0" type="range" min="-1" max="4" step="0.05" value="0.5">
+                  </div>
+
+                  <div>
+                    <div class="flex justify-between text-xs font-mono text-slate-300 mb-1">
+                      <span>Nachylenie (b₁):</span>
+                      <span id="m1ValB1" class="text-amber-400 font-bold">0.50</span>
+                    </div>
+                    <input id="m1SliderB1" type="range" min="0" max="1.8" step="0.02" value="0.5">
+                  </div>
+                </div>
+
+                <div class="p-4 bg-[#0c0f17] rounded-xl border border-white/5 space-y-2 text-xs font-mono">
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Suma pól kwadratów (RSS):</span>
+                    <span id="m1ValRSS" class="text-rose-400 font-bold text-sm">--</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Łączna powierzchnia:</span>
+                    <span id="m1ValAreaSum" class="text-amber-300 font-bold">--</span>
+                  </div>
+                </div>
+
+                <p class="text-[11px] text-slate-400 leading-relaxed font-sans">
+                  Przesuwaj suwaki nachylenia. Obserwuj, jak kwadraty rosną dramatycznie na krańcach, gdy prosta oddala się od punktów. Kliknij <strong class="text-amber-300">Animuj minimalizację OLS</strong>, aby zobaczyć fizyczne skurczenie pól kwadratów do globalnego minimum!
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 2: RZUT ORTOGONALNY W PRZESTRZENI (3D PROJECTION)
+             ========================================================================== -->
+        <section id="modul-2" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł II</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Rzut Ortogonalny w Przestrzeni Liniowej
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Ujęcie algebraiczne: dlaczego wektor błędów musi być prostopadły do podprzestrzeni kolumn X?</p>
+          </div>
+
+          <div class="text-slate-300 text-sm leading-relaxed space-y-4 font-sans font-light">
+            <p>
+              W algebrze liniowej wektor odpowiedzi $\mathbf{y} \in \mathbb{R}^n$ zazwyczaj nie leży w podprzestrzeni rozpiętej przez kolumny macierzy planu $\mathbf{X}$ (oznaczanej jako $\mathrm{col}(\mathbf{X})$). 
+              Najlepsze możliwe przybliżenie to <strong>rzut ortogonalny</strong> $\hat{\mathbf{y}}$ wektora $\mathbf{y}$ na tę podprzestrzeń.
+            </p>
+            <div class="theorem-box cyan">
+              $$\mathbf{y} = \hat{\mathbf{y}} + \mathbf{e} = \mathbf{X}\hat{\boldsymbol{\beta}} + \mathbf{e}$$
+              $$\mathbf{X}^T \mathbf{e} = \mathbf{0} \iff \mathbf{e} \perp \mathrm{col}(\mathbf{X})$$
+            </div>
+            <p>
+              Ponieważ błąd $\mathbf{e}$ musi być prostopadły do każdego wektora z podprzestrzeni $\mathbf{X}$, iloczyn skalarny wynosi zero. 
+              Stąd natychmiast wynika równanie normalne:
+            </p>
+            <div class="theorem-box emerald">
+              $$\mathbf{X}^T(\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}) = \mathbf{0} \implies \mathbf{X}^T\mathbf{X}\hat{\boldsymbol{\beta}} = \mathbf{X}^T\mathbf{y} \implies \hat{\boldsymbol{\beta}} = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}$$
+            </div>
+          </div>
+
+          <!-- Animowane Płótno Rzutu 3D -->
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-4">
+            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-cyan-300 uppercase tracking-wider flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                Płótno II: Przestrzeń Liniowa & Kąt Prosty Rzutu (90°)
+              </span>
+              <span class="text-xs text-slate-400 font-sans">Płynna animacja wektorowa</span>
+            </div>
+            <div class="relative w-full h-80 rounded-xl overflow-hidden bg-[#07090e] border border-white/5">
+              <canvas id="projCanvas" class="w-full h-full block"></canvas>
+            </div>
+            <p class="text-xs text-slate-400 text-center font-sans">
+              Zauważ symbol kąta prostego $90^\circ$ między wektorem reszt $\mathbf{e}$ a płaszczyzną kolumn $\mathrm{col}(\mathbf{X})$.
+            </p>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 3: FIZYKA GRADIENT DESCENT
+             ========================================================================== -->
+        <section id="modul-3" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł III</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Fizyka Spadku Wzdłuż Gradientu (Gradient Descent)
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Pole wektorowe funkcji kosztu i tocząca się kulka parametrów</p>
+          </div>
+
+          <div class="text-slate-300 text-sm leading-relaxed space-y-4 font-sans font-light">
+            <p>
+              Funkcja straty $J(\beta_0, \beta_1) = \frac{1}{2n}\sum (\hat{y}_i - y_i)^2$ tworzy paraboliczną misę. Wektor gradientu $\nabla J$ wskazuje kierunek najszybszego wzrostu błędu. Poruszając się w kierunku przeciwnym $-\nabla J$, staczamy się do globalnego minimum.
+            </p>
+          </div>
+
+          <!-- Interaktywna Symulacja Fizyki GD -->
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-amber-300 uppercase tracking-wider flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                Płótno III: Kliknij w dowolnym punkcie, by upuścić kulkę!
+              </span>
+              <div class="flex items-center gap-2">
+                <button id="gdBtnRun" class="btn-gold px-4 py-1.5 rounded-lg text-xs font-sans">
+                  Uruchom spadek
+                </button>
+                <button id="gdBtnReset" class="btn-ghost px-3 py-1.5 rounded-lg text-xs font-sans">
+                  Reset
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-8">
+                <div class="relative w-full h-80 rounded-xl overflow-hidden bg-[#07090e] border border-white/5 cursor-crosshair">
+                  <canvas id="gdCanvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+
+              <div class="lg:col-span-4 space-y-5">
+                <div>
+                  <div class="flex justify-between text-xs font-mono text-slate-300 mb-1">
+                    <span>Współczynnik uczenia (α):</span>
+                    <span id="gdValLR" class="text-amber-400 font-bold">0.050</span>
+                  </div>
+                  <input id="gdSliderLR" type="range" min="0.005" max="0.14" step="0.005" value="0.05">
+                </div>
+
+                <div class="p-4 bg-[#0c0f17] rounded-xl border border-white/5 space-y-2 text-xs font-mono">
+                  <div class="flex justify-between">
+                    <span class="text-slate-400">Bieżący Koszt J:</span>
+                    <span id="gdValCost" class="text-rose-400 font-bold text-sm">--</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400 font-sans mt-2">
+                    Żółta strzałka przy kulce to dynamiczny wektor gradientu $-\nabla J$, wyznaczający siłę i kierunek spadku w danym punkcie.
+                  </div>
+                </div>
+
+                <p class="text-[11px] text-slate-400 leading-relaxed font-sans">
+                  Zwiększ współczynnik uczenia powyżej 0.10 i zobacz, jak kulka zaczyna oscylować wokół minimum lub przestrzeliwuje dno (efekt overshooting).
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 4: ZAŁOŻENIA GAUSSA-MARKOWA & DIAGNOSTYKA
+             ========================================================================== -->
+        <section id="modul-4" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł IV</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Założenia Gaussa-Markowa & Płynna Morfologia Reszt
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Twierdzenie BLUE i interaktywne badanie naruszeń w czasie rzeczywistym</p>
+          </div>
+
+          <div class="text-slate-300 text-sm leading-relaxed space-y-4 font-sans font-light">
+            <p>
+              Estymator OLS jest <strong>BLUE</strong> (<em>Best Linear Unbiased Estimator</em> - najlepszy nieobciążony liniowy estymator) wyłącznie przy spełnieniu 5 założeń twierdzenia Gaussa-Markowa:
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-sans my-2">
+              <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                <strong class="text-amber-300 block mb-0.5">1. Liniowość parametrów</strong>
+                Model jest liniowy względem wektora $\boldsymbol{\beta}$.
+              </div>
+              <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                <strong class="text-amber-300 block mb-0.5">2. Egzogeniczność</strong>
+                $\mathbb{E}[\varepsilon|\mathbf{X}] = 0$. Brak korelacji błędu z predyktorami.
+              </div>
+              <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                <strong class="text-amber-300 block mb-0.5">3. Homoskedastyczność</strong>
+                $\mathrm{Var}(\varepsilon_i|\mathbf{X}) = \sigma^2$. Stała wariancja błędów.
+              </div>
+              <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                <strong class="text-amber-300 block mb-0.5">4. Brak autokorelacji</strong>
+                $\mathrm{Cov}(\varepsilon_i, \varepsilon_j) = 0$ dla $i \neq j$.
+              </div>
+            </div>
+          </div>
+
+          <!-- Laboratorium Diagnostyki Reszt -->
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-amber-300 uppercase tracking-wider">
+                Wybierz Przypadek Diagnostyczny:
+              </span>
+              <select id="gmSelectScenario" class="bg-[#0c0f17] border border-white/10 text-xs text-amber-300 rounded-lg px-3 py-1.5 outline-none font-sans">
+                <option value="ideal">1. Wzorzec Idealny (Gauss-Markov Spełniony)</option>
+                <option value="hetero">2. Heteroskedastyczność (Lejek wariancji)</option>
+                <option value="nonlinear">3. Nieliniowość (Ukryta Parabola)</option>
+                <option value="leverage">4. Punkt Dźwigni i Outlier</option>
+              </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div id="gmPlotFit" class="w-full h-64 rounded-xl overflow-hidden bg-[#07090e]"></div>
+              <div id="gmPlotRes" class="w-full h-64 rounded-xl overflow-hidden bg-[#07090e]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-[#0c0f17] rounded-xl border border-white/5 text-xs font-sans">
+              <div>
+                <span class="text-rose-400 font-semibold uppercase tracking-wider block mb-1">Diagnoza:</span>
+                <p id="gmTextDiag" class="text-slate-300 leading-relaxed">--</p>
+              </div>
+              <div>
+                <span class="text-emerald-400 font-semibold uppercase tracking-wider block mb-1">Rekomendowane Lekarstwo:</span>
+                <p id="gmTextRemedy" class="text-slate-300 leading-relaxed">--</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 5: KWARTET ANSCOMBE'A
+             ========================================================================== -->
+        <section id="modul-5" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł V</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Kwartet Anscombe'a (1973)
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Cztery zbiory o identycznych średnich i identycznym R² = 0.67, lecz zupełnie różnym świecie</p>
+          </div>
+
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-amber-300 uppercase tracking-wider">
+                Przełącznik Zbiorów Danych:
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button data-set="I" class="ans-btn btn-ghost px-3 py-1 rounded-md text-xs font-mono active border-amber-400 text-amber-300">Zbiór I</button>
+                <button data-set="II" class="ans-btn btn-ghost px-3 py-1 rounded-md text-xs font-mono">Zbiór II</button>
+                <button data-set="III" class="ans-btn btn-ghost px-3 py-1 rounded-md text-xs font-mono">Zbiór III</button>
+                <button data-set="IV" class="ans-btn btn-ghost px-3 py-1 rounded-md text-xs font-mono">Zbiór IV</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+              <div class="lg:col-span-7">
+                <div id="ansPlot" class="w-full h-80 rounded-xl overflow-hidden bg-[#07090e]"></div>
+              </div>
+
+              <div class="lg:col-span-5 space-y-4 font-sans text-xs">
+                <div class="p-4 bg-[#0c0f17] rounded-xl border border-white/5 space-y-2 font-mono">
+                  <div class="flex justify-between"><span class="text-slate-400">Wyraz wolny b₀:</span><span id="ansB0" class="text-slate-200">3.00</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Nachylenie b₁:</span><span id="ansB1" class="text-slate-200">0.500</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Współczynnik R²:</span><span id="ansR2" class="text-emerald-400 font-bold">0.667</span></div>
+                </div>
+
+                <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-200/90 leading-relaxed">
+                  <strong class="text-white block mb-1">Morał:</strong>
+                  <p id="ansDesc">--</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 6: PASY UFNOŚCI & PREDYKCJI
+             ========================================================================== -->
+        <section id="modul-6" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł VI</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Pasy Ufności (Średnia) vs Pasy Predykcji (Nowy Punkt)
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Dlaczego prognoza dla konkretnej obserwacji jest ZAWSZE obarczona większą niepewnością?</p>
+          </div>
+
+          <div class="text-slate-300 text-sm leading-relaxed space-y-4 font-sans font-light">
+            <p>
+              Gdy przewidujemy wartość w punkcie $x_0$, pojawiają się dwa różne źródła niepewności:
+            </p>
+            <div class="theorem-box cyan">
+              $$\text{Pas Ufności (dla } \mathbb{E}[Y|X=x_0]\text{)}: \quad SE = s \sqrt{\frac{1}{n} + \frac{(x_0 - \bar{x})^2}{\sum (x_i - \bar{x})^2}}$$
+              $$\text{Pas Predykcji (dla nowego } y_0\text{)}: \quad SE = s \sqrt{\mathbf{1} + \frac{1}{n} + \frac{(x_0 - \bar{x})^2}{\sum (x_i - \bar{x})^2}}$$
+            </div>
+            <p>
+              Dodatkowa jedynka pod pierwiastkiem w pasie predykcji reprezentuje nieusuwalną wariancję błędu losowego pojedynczej obserwacji $\varepsilon_0 \sim \mathcal{N}(0, \sigma^2)$.
+            </p>
+          </div>
+
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-5">
+            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-amber-300 uppercase tracking-wider">
+                Poziom Ufności: <span id="infValConf" class="text-white font-bold">95%</span>
+              </span>
+              <input id="infSliderConf" type="range" min="0.90" max="0.99" step="0.045" value="0.95" class="w-32">
+            </div>
+
+            <div id="infPlot" class="w-full h-80 rounded-xl overflow-hidden bg-[#07090e]"></div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 7: GEOMETRIA REGULARYZACJI (LASSO VS RIDGE)
+             ========================================================================== -->
+        <section id="modul-7" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł VII</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Geometria Regularyzacji: Ridge (L₂) vs Lasso (L₁)
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Dlaczego romb L₁ zeruje współczynniki, a okrąg L₂ tylko je zmniejsza?</p>
+          </div>
+
+          <div class="text-slate-300 text-sm leading-relaxed space-y-4 font-sans font-light">
+            <p>
+              Wysokowymiarowa regresja cierpi na problem multikolinearności. Dodając karę za normę wektora parametrów, ograniczamy przestrzeń rozwiązań:
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono my-2">
+              <div class="p-3 bg-white/5 rounded-xl border border-sky-500/20">
+                <span class="text-sky-300 block font-bold mb-1">Ridge (Norma L₂):</span>
+                $$\min \|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2 + \lambda \|\boldsymbol{\beta}\|_2^2$$
+                Ograniczenie to kula (okrąg w 2D). Punkt styczności leży w gładkim miejscu - współczynniki maleją, ale nie osiągają zera.
+              </div>
+              <div class="p-3 bg-white/5 rounded-xl border border-amber-500/20">
+                <span class="text-amber-300 block font-bold mb-1">Lasso (Norma L₁):</span>
+                $$\min \|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2 + \lambda \|\boldsymbol{\beta}\|_1$$
+                Ograniczenie to wielościan (romb w 2D) z ostrymi narożnikami leżącymi dokładnie na osiach! Kontury błędu uderzają w narożnik, wymuszając $\beta_2 = 0$.
+              </div>
+            </div>
+          </div>
+
+          <!-- Płótno Geometrii Regularyzacji -->
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-5">
+            <div class="flex items-center justify-between border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-amber-300 uppercase tracking-wider">
+                Siła Kary λ: <span id="regValLambda" class="text-white font-bold">1.0</span>
+              </span>
+              <input id="regSliderLambda" type="range" min="0" max="4.0" step="0.2" value="1.0" class="w-36">
+            </div>
+
+            <div class="relative w-full h-80 rounded-xl overflow-hidden bg-[#07090e] border border-white/5">
+              <canvas id="regGeometryCanvas" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 8: TACTILE SANDBOX
+             ========================================================================== -->
+        <section id="modul-8" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł VIII</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Dotykowy Sandbox (Plac Doświadczalny)
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Kliknij, by dodać punkt. Przeciągaj punkty myszką w 60 klatkach na sekundę.</p>
+          </div>
+
+          <div class="bg-[#090c13] rounded-2xl p-6 border border-white/5 space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 pb-3">
+              <span class="text-xs font-mono text-slate-300">
+                Prawy przycisk usuwa punkt | Przeciąganie bada dźwignię
+              </span>
+              <div class="flex items-center gap-2">
+                <button id="sbRandom" class="btn-ghost px-3 py-1 rounded-lg text-xs font-sans">15 Losowych</button>
+                <button id="sbClear" class="btn-ghost px-3 py-1 rounded-lg text-xs font-sans text-rose-300">Wyczyść</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div class="lg:col-span-8">
+                <div class="relative w-full h-96 rounded-xl overflow-hidden bg-[#07090e] border border-white/5 cursor-crosshair">
+                  <canvas id="tactileCanvas" class="w-full h-full block"></canvas>
+                </div>
+              </div>
+
+              <div class="lg:col-span-4 space-y-4 font-mono text-xs">
+                <div class="p-4 bg-[#0c0f17] rounded-xl border border-white/5 space-y-2">
+                  <div class="flex justify-between"><span class="text-slate-400">Liczba punktów n:</span><span id="sbN" class="text-white font-bold">--</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Wyraz wolny b₀:</span><span id="sbB0" class="text-slate-200">--</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Nachylenie b₁:</span><span id="sbB1" class="text-slate-200">--</span></div>
+                  <div class="flex justify-between"><span class="text-slate-400">Współczynnik R²:</span><span id="sbR2" class="text-emerald-400 font-bold">--</span></div>
+                </div>
+
+                <div class="p-4 bg-[#0c0f17] rounded-xl border border-amber-500/20 text-center">
+                  <span class="text-[11px] text-slate-400 block mb-1">Dopasowana Prosta OLS:</span>
+                  <div id="sbFormula" class="text-sm font-bold text-amber-300 py-1">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 9: QUIZ WIEDZY
+             ========================================================================== -->
+        <section id="modul-9" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł IX</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Sprawdzian Głębokiego Zrozumienia (Quiz)
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Zaznacz odpowiedź, aby natychmiast sprawdzić swoje myślenie</p>
+          </div>
+
+          <div class="space-y-6">
+            <!-- Pytanie 1 -->
+            <div class="p-5 rounded-xl bg-[#090c13] border border-white/5 space-y-3 font-sans">
+              <h4 class="text-sm font-medium text-white">
+                1. Dlaczego minimalizacja sumy kwadratów (e²) daje dokładnie to samo rozwiązanie, co metoda największej wiarogodności (MLE)?
+              </h4>
+              <div class="space-y-2">
+                <div class="quiz-card p-3 rounded-lg text-xs bg-[#0c0f17] text-slate-300" data-correct="false" data-explain="MLE i OLS są tożsame tylko przy założeniu normalności.">
+                  A. Zawsze i w każdych warunkach te metody dają ten sam wynik, niezależnie od rozkładu błędu.
+                </div>
+                <div class="quiz-card p-3 rounded-lg text-xs bg-[#0c0f17] text-slate-300" data-correct="true" data-explain="Gęstość rozkładu Gaussa zawiera exp(-e² / (2σ²)). Maksymalizacja log-wiarogodności jest matematycznie tożsama z minimalizacją sumy e²!">
+                  B. Ponieważ przy rozkładzie normalnym Gaussa exp(-e²/2σ²), logarytm funkcji wiarogodności prowadzi wprost do minimalizacji sumy kwadratów reszt.
+                </div>
+                <div class="quiz-card p-3 rounded-lg text-xs bg-[#0c0f17] text-slate-300" data-correct="false" data-explain="To nie przypadek, lecz bezpośrednia konsekwencja wykładnika w rozkładzie Gaussa.">
+                  C. To jedynie zbieg okoliczności w małych próbach.
+                </div>
+              </div>
+              <div class="quiz-feedback hidden"></div>
+            </div>
+
+            <!-- Pytanie 2 -->
+            <div class="p-5 rounded-xl bg-[#090c13] border border-white/5 space-y-3 font-sans">
+              <h4 class="text-sm font-medium text-white">
+                2. W geometrii przestrzeni liniowej, czym jest wektor prognoz ŷ względem wektora odpowiedzi y?
+              </h4>
+              <div class="space-y-2">
+                <div class="quiz-card p-3 rounded-lg text-xs bg-[#0c0f17] text-slate-300" data-correct="true" data-explain="ŷ jest rzutem ortogonalnym y na podprzestrzeń rozpiętą przez kolumny macierzy X pod kątem 90 stopni.">
+                  A. Rzutem ortogonalnym wektora y na podprzestrzeń rozpiętą przez kolumny macierzy planu X (pod kątem 90°).
+                </div>
+                <div class="quiz-card p-3 rounded-lg text-xs bg-[#0c0f17] text-slate-300" data-correct="false" data-explain="Wektor błędów jest prostopadły, a nie równoległy.">
+                  B. Wektorem leżącym dokładnie równolegle do wektora błędów e.
+                </div>
+              </div>
+              <div class="quiz-feedback hidden"></div>
+            </div>
+
+            <!-- Pytanie 3 -->
+            <div class="p-5 rounded-xl bg-[#090c13] border border-white/5 space-y-3 font-sans">
+              <h4 class="text-sm font-medium text-white">
+                3. Dlaczego regularyzacja Lasso (L₁) potrafi zredukować wagę zmiennej DOKŁADNIE do zera?
+              </h4>
+              <div class="space-y-2">
+                <div class="quiz-card p-3 rounded-lg text-xs bg-[#0c0f17] text-slate-300" data-correct="true" data-explain="Ograniczenie w kształcie rombu posiada ostre narożniki na osiach współrzędnych, w które najpierw uderzają eliptyczne poziomice funkcji kosztu.">
+                  A. Ponieważ ograniczenie w normie L₁ ma kształt rombu z ostrymi narożnikami leżącymi na osiach współrzędnych.
+                </div>
+                <div class="quiz-card p-3 rounded-lg text-xs bg-[#0c0f17] text-slate-300" data-correct="false" data-explain="Ridge tylko asymptotycznie zbliża wagi do zera, nie zerując ich.">
+                  B. Ponieważ stosuje funkcję kwadratową identycznie jak Ridge.
+                </div>
+              </div>
+              <div class="quiz-feedback hidden"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==========================================================================
+             MODUŁ 10: KOMPENDIUM WZORÓW
+             ========================================================================== -->
+        <section id="modul-10" class="editorial-panel p-6 sm:p-10 space-y-6">
+          <div class="border-b border-white/5 pb-4">
+            <span class="text-xs font-mono text-amber-400 tracking-widest uppercase">Moduł X</span>
+            <h3 class="text-2xl sm:text-3xl font-serif-heading font-normal text-white mt-1">
+              Kompendium Wzorów (Cheat Sheet)
+            </h3>
+            <p class="text-xs text-slate-400 mt-1">Precyzyjne zestawienie tożsamości statystycznych i algebry OLS</p>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs font-sans border border-white/5 rounded-xl overflow-hidden">
+              <thead class="bg-[#0c0f17] text-amber-300/80 font-mono uppercase tracking-wider">
+                <tr>
+                  <th class="p-3 border-b border-white/5">Wielkość Statystyczna</th>
+                  <th class="p-3 border-b border-white/5">Wzór Analityczny</th>
+                  <th class="p-3 border-b border-white/5">Znaczenie Geometryczne</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5 text-slate-300">
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="p-3 font-semibold text-white">Współczynnik nachylenia β₁</td>
+                  <td class="p-3 font-mono text-amber-300">$$\hat{\beta}_1 = \frac{\mathrm{Cov}(X,Y)}{\mathrm{Var}(X)}$$</td>
+                  <td class="p-3">Stosunek kowariancji do wariancji predyktora.</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="p-3 font-semibold text-white">Równanie Normalne OLS</td>
+                  <td class="p-3 font-mono text-emerald-300">$$\hat{\boldsymbol{\beta}} = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}$$</td>
+                  <td class="p-3">Operator rzutu ortogonalnego w $\mathbb{R}^n$.</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="p-3 font-semibold text-white">Wariancja estymatora Var(β̂)</td>
+                  <td class="p-3 font-mono text-sky-300">$$\sigma^2 (\mathbf{X}^T\mathbf{X})^{-1}$$</td>
+                  <td class="p-3">Kowariancja wag (eksploduje przy współliniowości).</td>
+                </tr>
+                <tr class="hover:bg-white/[0.02]">
+                  <td class="p-3 font-semibold text-white">Regresja Grzbietowa (Ridge)</td>
+                  <td class="p-3 font-mono text-amber-300">$$(\mathbf{X}^T\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^T\mathbf{y}$$</td>
+                  <td class="p-3">Dodanie przekątnej $\lambda\mathbf{I}$ gwarantuje odwracalność macierzy.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
